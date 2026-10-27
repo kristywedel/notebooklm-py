@@ -162,17 +162,28 @@ def capture_oauth_token(
                 if not token:
                     logger.debug("OAuth capture: timeout expired without oauth_token cookie")
             finally:
+                # Chrome may already have torn itself down after #close; a
+                # TargetClosedError here must not discard a captured token.
                 if page is not None:
                     logger.debug("OAuth capture: closing login page")
-                    page.close()
+                    try:
+                        page.close()
+                    except Exception:
+                        pass
                     logger.debug("OAuth capture: login page closed")
                 if owns_context and context is not None:
                     logger.debug("OAuth capture: closing browser context")
-                    context.close()
+                    try:
+                        context.close()
+                    except Exception:
+                        pass
                     logger.debug("OAuth capture: browser context closed")
                 if owns_browser and browser_obj is not None:
                     logger.debug("OAuth capture: closing browser")
-                    browser_obj.close()
+                    try:
+                        browser_obj.close()
+                    except Exception:
+                        pass
                     logger.debug("OAuth capture: browser closed")
                 logger.debug("OAuth capture: stopping Playwright")
 
